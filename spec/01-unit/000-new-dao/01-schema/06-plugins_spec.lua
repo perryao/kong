@@ -110,14 +110,13 @@ describe("plugins", function()
     assert.same({
       key_names = { "apikey" },
       hide_credentials = false,
-      anonymous = "",
+      anonymous = ngx.null,
       key_in_body = false,
       run_on_preflight = true,
     }, plugin.config)
   end)
 
   it("should be valid if no value is specified for a subfield and if the config schema has default as empty array", function()
-  it("#should be valid if no value is specified for a subfield and if the config schema has default as empty array", function()
     -- Insert response-transformer, whose default config has no default values, and should be empty
     local plugin = {
       name = "response-transformer",
