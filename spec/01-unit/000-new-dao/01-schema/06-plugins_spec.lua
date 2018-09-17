@@ -117,14 +117,14 @@ describe("plugins", function()
   end)
 
   it("should be valid if no value is specified for a subfield and if the config schema has default as empty array", function()
+  it("#should be valid if no value is specified for a subfield and if the config schema has default as empty array", function()
     -- Insert response-transformer, whose default config has no default values, and should be empty
     local plugin = {
       name = "response-transformer",
       service = { id = utils.uuid() },
     }
     plugin = Plugins:process_auto_fields(plugin)
-    local ok = Plugins:validate(plugin)
-    assert.is_true(ok)
+    assert(Plugins:validate(plugin))
     assert.same({
       remove = {
         headers = {},

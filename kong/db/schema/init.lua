@@ -1202,7 +1202,8 @@ local function adjust_field_for_context(field, value, context, nulls)
      and value ~= null and
      (value ~= nil or field.nullable == false) then
     local field_schema = get_field_schema(field)
-    return field_schema:process_auto_fields(value or {}, context, nulls)
+    value = value or handle_missing_field(field, value)
+    return field_schema:process_auto_fields(value, context, nulls)
   end
   if value == nil then
     return handle_missing_field(field, value)
