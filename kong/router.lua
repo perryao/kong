@@ -193,7 +193,7 @@ local function marshall_route(r)
 
         else
           -- regex URI
-          local strip_regex  = path .. [[/?(?<stripped_uri>.*)]]
+          local strip_regex  = path .. [[?(?<stripped_uri>.*)]]
           local has_captures = has_capturing_groups(path)
 
           local uri_t    = {
@@ -371,7 +371,7 @@ do
 
             if m then
               if m.stripped_uri then
-                ctx.matches.stripped_uri = "/" .. m.stripped_uri
+                ctx.matches.stripped_uri = m.stripped_uri
                 -- remove the stripped_uri group
                 m[#m]          = nil
                 m.stripped_uri = nil
@@ -388,15 +388,7 @@ do
           end
 
           -- plain or prefix match from the index
-          if route_t.strip_uri then
-            local stripped_uri = sub(ctx.req_uri, #uri_t.value + 1)
-            if sub(stripped_uri, 1, 1) ~= "/" then
-              stripped_uri = "/" .. stripped_uri
-            end
-
-            ctx.matches.stripped_uri = stripped_uri
-          end
-
+          ctx.matches.stripped_uri = sub(ctx.req_uri, #uri_t.value + 1)
           ctx.matches.uri = uri_t.value
 
           return true
@@ -415,7 +407,7 @@ do
 
           if m then
             if m.stripped_uri then
-              ctx.matches.stripped_uri = "/" .. m.stripped_uri
+              ctx.matches.stripped_uri = m.stripped_uri
               -- remove the stripped_uri group
               m[#m]          = nil
               m.stripped_uri = nil
@@ -434,17 +426,7 @@ do
           -- plain or prefix match (not from the index)
           local from, to = find(ctx.req_uri, uri_t.value, nil, true)
           if from == 1 then
-            ctx.matches.uri = sub(ctx.req_uri, 1, to)
-
-            if route_t.strip_uri then
-              local stripped_uri = sub(ctx.req_uri, to + 1)
-              if sub(stripped_uri, 1, 1) ~= "/" then
-                stripped_uri = "/" .. stripped_uri
-              end
-
-              ctx.matches.stripped_uri = stripped_uri
-            end
-
+            ctx.matches.stripped_uri = sub(ctx.req_uri, to + 1)
             ctx.matches.uri = uri_t.value
 
             return true
@@ -780,6 +762,9 @@ function _M.new(routes)
                and matches.stripped_uri
             then
               upstream_uri = matches.stripped_uri
+              if sub(upstream_uri, 1, 1) ~= "/" then
+                upstream_uri = "/" .. upstream_uri
+              end
             end
 
             -- uri trailing slash logic
