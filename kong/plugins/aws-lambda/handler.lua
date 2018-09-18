@@ -38,6 +38,22 @@ local server_header = meta._SERVER_TOKENS
 local AWS_PORT = 443
 
 
+local function get_body_args()
+  cjson.decode_array_with_array_mt(true)
+  local body_args = public_utils.get_body_args()
+  cjson.decode_array_with_array_mt(false)
+  return body_args
+end
+
+
+local function get_body_info()
+  cjson.decode_array_with_array_mt(true)
+  local args, err_code, raw_body, req_mime = public_utils.get_body_info()
+  cjson.decode_array_with_array_mt(false)
+  return args, err_code, raw_body, req_mime
+end
+
+
 local function send(status, content, headers)
   ngx.status = status
 
@@ -103,7 +119,7 @@ function AWSLambdaHandler:access(conf)
     if conf.forward_request_body then
       ngx_req_read_body()
 
-      local body_args, err_code, body_raw = public_utils.get_body_info()
+      local body_args, err_code, body_raw = get_body_info()
       if err_code == public_utils.req_body_errors.unknown_ct then
         -- don't know what this body MIME type is, base64 it just in case
         body_raw = ngx_encode_base64(body_raw)
@@ -119,7 +135,7 @@ function AWSLambdaHandler:access(conf)
     -- `forward_request_*` values
     ngx_req_read_body()
 
-    local body_args = public_utils.get_body_args()
+    local body_args = get_body_args()
     upstream_body = utils.table_merge(ngx_req_get_uri_args(), body_args)
   end
 
