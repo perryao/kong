@@ -1,16 +1,28 @@
-local schemas = require "kong.dao.schemas_validation"
-local datadog_schema = require "kong.plugins.datadog.schema"
-local validate_entity = schemas.validate_entity
+local Schema = require "kong.db.schema"
+local plugins_schema_def = require "kong.db.schema.entities.plugins"
+local schema_def = require "kong.plugins.datadog.schema"
+
+local plugins_schema = assert(Schema.new(plugins_schema_def))
+assert(plugins_schema:new_subschema(schema_def.name, schema_def))
+
+
+local function validate_config(config)
+  return plugins_schema:validate_insert({
+    name = schema_def.name,
+    config = config
+  })
+end
+
 
 describe("Plugin: datadog (schema)", function()
   it("accepts empty config #o", function()
-    local ok, err = validate_entity({}, datadog_schema)
+    local ok, err = validate_config({})
     assert.is_nil(err)
     assert.is_true(ok)
   end)
   it("accepts empty metrics", function()
     local metrics_input = {}
-    local ok, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    local ok, err = validate_config({ metrics = metrics_input})
     assert.is_nil(err)
     assert.is_true(ok)
   end)
@@ -23,7 +35,7 @@ describe("Plugin: datadog (schema)", function()
         tags = {"K1:V1"}
       }
     }
-    local ok, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    local ok, err = validate_config({ metrics = metrics_input})
     assert.is_nil(err)
     assert.is_true(ok)
   end)
@@ -34,18 +46,16 @@ describe("Plugin: datadog (schema)", function()
         sample_rate = 1
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("name and stat_type must be defined for all stats", err.metrics)
+    local _, err = validate_config({ metrics = metrics_input })
+    assert.same({ stat_type = "required field missing" }, err.config.metrics)
     local metrics_input = {
       {
         stat_type = "counter",
         sample_rate = 1
       }
     }
-    _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("name and stat_type must be defined for all stats", err.metrics)
+    _, err = validate_config({ metrics = metrics_input})
+    assert.same("required field missing", err.config.metrics.name)
   end)
   it("rejects counters without sample rate", function()
     local metrics_input = {
@@ -54,7 +64,7 @@ describe("Plugin: datadog (schema)", function()
         stat_type = "counter",
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    local _, err = validate_config({ metrics = metrics_input})
     assert.not_nil(err)
   end)
   it("rejects invalid metrics name", function()
@@ -64,9 +74,9 @@ describe("Plugin: datadog (schema)", function()
         stat_type = "counter",
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("unrecognized metric name: invalid_name", err.metrics)
+    local _, err = validate_config({ metrics = metrics_input})
+    assert.match("expected one of: kong_latency", err.config.metrics.name)
+    assert.equal("required field missing", err.config.metrics.sample_rate)
   end)
   it("rejects invalid stat type", function()
     local metrics_input = {
@@ -75,9 +85,8 @@ describe("Plugin: datadog (schema)", function()
         stat_type = "invalid_stat",
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("unrecognized stat_type: invalid_stat", err.metrics)
+    local _, err = validate_config({ metrics = metrics_input})
+    assert.match("expected one of: counter", err.config.metrics.stat_type)
   end)
   it("rejects if customer identifier missing", function()
     local metrics_input = {
@@ -87,9 +96,8 @@ describe("Plugin: datadog (schema)", function()
         sample_rate = 1
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("consumer_identifier must be defined for metric status_count_per_user", err.metrics)
+    local _, err = validate_config({ metrics = metrics_input })
+    assert.equals("required field missing", err.config.metrics.consumer_identifier)
   end)
   it("rejects if metric has wrong stat type", function()
     local metrics_input = {
@@ -98,9 +106,9 @@ describe("Plugin: datadog (schema)", function()
         stat_type = "counter"
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    local _, err = validate_config({ metrics = metrics_input})
     assert.not_nil(err)
-    assert.equal("unique_users metric only works with stat_type 'set'", err.metrics)
+    assert.equal("value must be counter", err.config.metrics.stat_type)
     metrics_input = {
       {
         name = "status_count",
@@ -108,9 +116,9 @@ describe("Plugin: datadog (schema)", function()
         sample_rate = 1
       }
     }
-    _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    _, err = validate_config({ metrics = metrics_input})
     assert.not_nil(err)
-    assert.equal("status_count metric only works with stat_type 'counter'", err.metrics)
+    assert.equal("value must be set", err.config.metrics.stat_type)
   end)
   it("rejects if tags malformed", function()
     local metrics_input = {
@@ -121,9 +129,8 @@ describe("Plugin: datadog (schema)", function()
         tags = {"T1:"}
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
-    assert.not_nil(err)
-    assert.equal("malformed tags: key 'T1:' has no value. Tags must be list of key[:value]", err.metrics)
+    local _, err = validate_config({ metrics = metrics_input})
+    assert.same({ tags = "invalid value: T1:" }, err.config.metrics)
   end)
   it("accept if tags is aempty list", function()
     local metrics_input = {
@@ -134,7 +141,7 @@ describe("Plugin: datadog (schema)", function()
         tags = {}
       }
     }
-    local _, err = validate_entity({ metrics = metrics_input}, datadog_schema)
+    local _, err = validate_config({ metrics = metrics_input})
     assert.is_nil(err)
   end)
 end)

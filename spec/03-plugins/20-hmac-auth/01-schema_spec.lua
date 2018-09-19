@@ -1,27 +1,38 @@
-local schemas          = require "kong.dao.schemas_validation"
-local hmac_auth_schema = require "kong.plugins.hmac-auth.schema"
-local validate_entity  = schemas.validate_entity
+local Schema = require "kong.db.schema"
+local plugins_schema_def = require "kong.db.schema.entities.plugins"
+local schema_def = require "kong.plugins.hmac-auth.schema"
 
+local plugins_schema = assert(Schema.new(plugins_schema_def))
+assert(plugins_schema:new_subschema(schema_def.name, schema_def))
+
+
+local function validate_config(config)
+  return plugins_schema:validate_insert({
+    name = schema_def.name,
+    config = config
+  })
+end
 
 describe("Plugin: hmac-auth (schema)", function()
   it("accepts empty config", function()
-    local ok, err = validate_entity({}, hmac_auth_schema)
+    local ok, err = validate_config({})
+    assert.is_truthy(ok)
     assert.is_nil(err)
-    assert.is_true(ok)
   end)
   it("accepts correct clock skew", function()
-    local ok, err = validate_entity({clock_skew = 10}, hmac_auth_schema)
+    local ok, err = validate_config({ clock_skew = 10 })
+    assert.is_truthy(ok)
     assert.is_nil(err)
-    assert.is_true(ok)
   end)
   it("errors with negative clock skew", function()
-    local ok, err = validate_entity({clock_skew = -10}, hmac_auth_schema)
-    assert.equal("Clock Skew should be positive", err.clock_skew)
-    assert.is_false(ok)
+    local ok, err = validate_config({ clock_skew = -10 })
+    assert.is_falsy(ok)
+    assert.equal("value must be greater than 0", err.config.clock_skew)
   end)
   it("errors with wrong algorithm", function()
-    local ok, err = validate_entity({algorithms = {"sha1024"}}, hmac_auth_schema)
-    assert.equal('"sha1024" is not allowed. Allowed values are: "hmac-sha1", "hmac-sha256", "hmac-sha384", "hmac-sha512"', err.algorithms)
-    assert.is_false(ok)
+    local ok, err = validate_config({ algorithms = { "sha1024" } })
+    assert.is_falsy(ok)
+    assert.equal("expected one of: hmac-sha1, hmac-sha256, hmac-sha384, hmac-sha512",
+                 err.config.algorithms)
   end)
 end)
