@@ -270,6 +270,9 @@ Schema.validators = {
   end,
 
   uuid = function(value)
+    if value == "" then
+      return true
+    end
     if #value ~= 36 then
       return nil
     end
