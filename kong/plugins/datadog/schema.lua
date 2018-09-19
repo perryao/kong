@@ -93,6 +93,7 @@ return {
     { config = {
         type = "record",
         nullable = false,
+        default = { metrics = DEFAULT_METRICS },
         fields = {
           { host = { type = "string", required = true, default = "localhost" }, },
           { port = { type = "integer", required = true, default = 8125 }, },
@@ -117,23 +118,24 @@ return {
                   }, },
 
                   { conditional = {
-                    if_field = "stat_type", if_match = { match = "^(counter|gauge)" },
-                    then_field = "sample_rate", then_match = { required = true },
+                    if_field = "stat_type",
+                    if_match = { one_of = { "counter", "gauge" }, },
+                    then_field = "sample_rate",
+                    then_match = { required = true },
                   }, },
 
                   { conditional = {
-                    if_field = "name", if_match = { match = "^(status_count_per_user|request_per_user|unique_users)" },
-                    then_field = "consumer_identifier", then_match = { required = true },
+                    if_field = "name",
+                    if_match = { one_of = { "status_count_per_user", "request_per_user", "unique_users" }, },
+                    then_field = "consumer_identifier",
+                    then_match = { required = true },
                   }, },
 
                   { conditional = {
-                    if_field = "name", if_match = { match = "^(status_count_per_user|request_per_user|unique_users)" },
-                    then_field = "consumer_identifier", then_match = { required = true },
-                  }, },
-
-                  { conditional = {
-                    if_field = "name", if_match = { match = "^(status_count|status_count_per_user|request_per_user" },
-                    then_field = "stat_type", then_match = { eq = "counter" },
+                    if_field = "name",
+                    if_match = { one_of = { "status_count", "status_count_per_user", "request_per_user" }, },
+                    then_field = "stat_type",
+                    then_match = { eq = "counter" },
                   }, },
   }, }, }, }, }, }, }, },
 }

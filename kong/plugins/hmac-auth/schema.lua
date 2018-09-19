@@ -19,7 +19,7 @@ return {
         fields = {
           { hide_credentials = { type = "boolean", default = false }, },
           { clock_skew = { type = "number", default = 300, gt = 0 }, },
-          { anonymous = { type = "string", uuid = true }, },
+          { anonymous = { type = "string", uuid = true, len_min = 0, default = "" }, },
           { validate_request_body = { type = "boolean", default = false }, },
           { enforce_headers = {
               type = "array",

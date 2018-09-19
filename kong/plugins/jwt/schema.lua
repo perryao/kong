@@ -21,14 +21,14 @@ return {
             type = "set",
             elements = {
               type = "string",
-              one_of = { "exp", "nbf" }
+              one_of = { "exp", "nbf" },
         }, }, },
-        { anonymous = { type = "string", uuid = true }, },
+        { anonymous = { type = "string", uuid = true, len_min = 0, default = "" }, },
         { run_on_preflight = { type = "boolean", default = true }, },
         { maximum_expiration = {
           type = "number",
           default = 0,
-          between = { 0, math.huge },
+          between = { 0, 31536000 },
         }, },
       },
     },
