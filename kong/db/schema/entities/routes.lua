@@ -78,7 +78,7 @@ return {
     { regex_priority = { type = "integer", default = 0 }, },
     { strip_path     = { type = "boolean", default = true }, },
     { preserve_host  = { type = "boolean", default = false }, },
-    { service        = { type = "foreign", reference = "services", required = true }, },
+    { service        = { type = "foreign", reference = "services", required = false }, },
   },
 
   entity_checks = {

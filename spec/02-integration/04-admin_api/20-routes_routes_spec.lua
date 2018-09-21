@@ -71,6 +71,9 @@ for _, strategy in helpers.each_strategy() do
           end
         end)
 
+        it("creates a route without a service", function()
+        end)
+
         it_content_types("creates a complex route", function(content_type)
           return function()
             local s = bp.services:insert()
