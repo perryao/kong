@@ -32,12 +32,12 @@ describe("routes schema", function()
     assert.falsy(route.strip_path)
   end)
 
-  it("fails when service is null", function()
+  it("succeeds when service is null", function()
     local route = { service = ngx.null, paths = {"/"} }
     route = Routes:process_auto_fields(route, "insert")
     local ok, errs = Routes:validate_insert(route)
-    assert.falsy(ok)
-    assert.truthy(errs["service"])
+    assert.truthy(ok)
+    assert.falsy(errs)
   end)
 
   it("fails when service.id is null", function()
