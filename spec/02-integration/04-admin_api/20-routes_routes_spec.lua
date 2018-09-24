@@ -125,12 +125,10 @@ for _, strategy in helpers.each_strategy() do
                 name     = "schema violation",
                 strategy = strategy,
                 message  = unindent([[
-                  2 schema violations
-                  (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths';
-                  service: required field missing)
+                  schema violation
+                  (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths')
                 ]], true, true),
                 fields = {
-                  service   = "required field missing",
                   ["@entity"] = {
                     "at least one of these fields must be non-empty: 'methods', 'hosts', 'paths'"
                   }
@@ -150,12 +148,10 @@ for _, strategy in helpers.each_strategy() do
                 code     = Errors.codes.SCHEMA_VIOLATION,
                 name     = "schema violation",
                 strategy = strategy,
-                message  = "2 schema violations " ..
-                          "(protocols: expected one of: http, https; " ..
-                          "service: required field missing)",
+                message  = "schema violation " ..
+                          "(protocols: expected one of: http, https)",
                 fields = {
                   protocols = "expected one of: http, https",
-                  service   = "required field missing",
                 }
               }, cjson.decode(body))
             end
@@ -407,12 +403,10 @@ for _, strategy in helpers.each_strategy() do
                   name     = "schema violation",
                   strategy = strategy,
                   message  = unindent([[
-                  2 schema violations
-                  (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths';
-                  service: required field missing)
+                  schema violation
+                  (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths')
                 ]], true, true),
                   fields  = {
-                    service   = "required field missing",
                     ["@entity"] = {
                       "at least one of these fields must be non-empty: 'methods', 'hosts', 'paths'"
                     }
@@ -432,12 +426,10 @@ for _, strategy in helpers.each_strategy() do
                   code     = Errors.codes.SCHEMA_VIOLATION,
                   name     = "schema violation",
                   strategy = strategy,
-                  message  = "2 schema violations " ..
-                    "(protocols: expected one of: http, https; " ..
-                    "service: required field missing)",
+                  message  = "schema violation " ..
+                    "(protocols: expected one of: http, https)",
                   fields  = {
                     protocols = "expected one of: http, https",
-                    service   = "required field missing",
                   }
                 }, cjson.decode(body))
 
