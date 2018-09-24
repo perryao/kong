@@ -47,12 +47,10 @@ for _, strategy in helpers.each_strategy() do
             name     = "schema violation",
             strategy = strategy,
             message  = unindent([[
-              2 schema violations
-              (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths';
-              service: required field missing)
+              schema violation
+              (at least one of these fields must be non-empty: 'methods', 'hosts', 'paths')
             ]], true, true),
             fields   = {
-              service     = "required field missing",
               ["@entity"] = {
                 "at least one of these fields must be non-empty: 'methods', 'hosts', 'paths'",
               }
