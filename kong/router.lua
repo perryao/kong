@@ -101,7 +101,10 @@ local function marshall_route(r)
   local headers  = r.headers        or null
   local paths    = route.paths      or null
   local methods  = route.methods    or null
-  local protocol = service.protocol or null
+  local protocol = null
+  if service ~= null then
+    protocol = service.protocol
+  end
 
   if not (headers ~= null or methods ~= null or paths ~= null) then
     return nil, "could not categorize route"
@@ -236,7 +239,10 @@ local function marshall_route(r)
     route_t.upstream_url_t.scheme = protocol
   end
 
-  local host = service.host or null
+  local host = null
+  if service ~= null then
+    host = service.host
+  end
   if host ~= null then
     route_t.upstream_url_t.host = host
     route_t.upstream_url_t.type = hostname_type(host)
@@ -245,7 +251,10 @@ local function marshall_route(r)
     route_t.upstream_url_t.type = hostname_type("")
   end
 
-  local port = service.port or null
+  local port = null
+  if service ~= null then
+    port = service.port
+  end
   if port ~= null then
     route_t.upstream_url_t.port = port
 
@@ -259,7 +268,10 @@ local function marshall_route(r)
   end
 
   -- TODO: service.path is not supported in new model
-  local path = service.path or null
+  local path = null
+  if service ~= null then
+    path = service.path
+  end
   local file = path
   if path ~= null then
     if sub(path, -1) == "/" and path ~= "/" then

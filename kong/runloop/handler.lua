@@ -91,16 +91,11 @@ local function build_router(db, version)
   while route do
     local service_pk = route.service
 
-    if not service_pk then
-      return nil, "route (" .. route.id .. ") is not associated with service"
-    end
-
     local service
 
     -- TODO: db requests in loop, problem or not
-    service, err = db.services:select(service_pk)
-    if not service then
-      return nil, "could not find service for route (" .. route.id .. "): " .. err
+    if service_pk then
+      service, err = db.services:select(service_pk)
     end
 
     local r = {
