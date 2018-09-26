@@ -96,7 +96,8 @@ local function build_router(db, version)
 
     -- TODO: db requests in loop, problem or not
     if service_pk then
-      service, err = db.services:select(service_pk)
+      -- TODO: should we log err?
+      service, err = db.services:select(service_pk) --luacheck: ignore
     end
 
     local r = {
