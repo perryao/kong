@@ -746,6 +746,9 @@ end
 -- @return true on success, nil+error message+status code otherwise
 local function execute(target)
 
+  if not target.ip and not target.host then
+    return nil, "Not Implemented", 429
+  end
   if target.type ~= "name" then
     -- it's an ip address (v4 or v6), so nothing we can do...
     target.ip = target.host
