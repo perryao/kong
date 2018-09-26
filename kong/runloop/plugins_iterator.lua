@@ -2,6 +2,7 @@ local responses    = require "kong.tools.responses"
 
 
 local kong         = kong
+local null         = ngx.null
 local setmetatable = setmetatable
 local ipairs       = ipairs
 
@@ -82,6 +83,7 @@ local function load_plugin_configuration(route_id,
 end
 
 
+-- TODO: fix nil/null service here
 local function get_next(self)
   local i = self.i + 1
 
@@ -111,7 +113,9 @@ local function get_next(self)
 
     local      api_id = api      and      api.id or nil
     local    route_id = route    and    route.id or nil
-    local  service_id = service  and  service.id or nil
+    -- TODO: why can service mostly be ngx.null, but 
+    -- sometimes nil?
+    local  service_id = service  and service ~= null and  service.id or nil
     local consumer_id = consumer and consumer.id or nil
 
     local plugin_name = plugin.name

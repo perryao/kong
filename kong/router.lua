@@ -103,7 +103,7 @@ local function marshall_route(r)
   local methods  = route.methods    or null
   local protocol = null
   if service ~= null then
-    protocol = service.protocol
+    protocol = service.protocol or null
   end
 
   if not (headers ~= null or methods ~= null or paths ~= null) then
@@ -241,7 +241,7 @@ local function marshall_route(r)
 
   local host = null
   if service ~= null then
-    host = service.host
+    host = service.host or null
   end
   if host ~= null then
     route_t.upstream_url_t.host = host
@@ -253,7 +253,7 @@ local function marshall_route(r)
 
   local port = null
   if service ~= null then
-    port = service.port
+    port = service.port or null
   end
   if port ~= null then
     route_t.upstream_url_t.port = port
@@ -270,7 +270,7 @@ local function marshall_route(r)
   -- TODO: service.path is not supported in new model
   local path = null
   if service ~= null then
-    path = service.path
+    path = service.path or null
   end
   local file = path
   if path ~= null then

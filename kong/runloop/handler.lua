@@ -29,6 +29,7 @@ local sort        = table.sort
 local ngx         = ngx
 local log         = ngx.log
 local ngx_now     = ngx.now
+local null        = ngx.null
 local update_time = ngx.update_time
 local re_match    = ngx.re.match
 local unpack      = unpack
@@ -91,7 +92,7 @@ local function build_router(db, version)
   while route do
     local service_pk = route.service
 
-    local service
+    local service = null
 
     -- TODO: db requests in loop, problem or not
     if service_pk then
@@ -532,7 +533,7 @@ return {
 
       -- TODO: this is probably not optimal
       do
-        local retries = service.retries or api.retries
+        local retries = service ~= null and service.retries or api.retries
         if retries then
           balancer_data.retries = retries
 
@@ -540,7 +541,7 @@ return {
           balancer_data.retries = 5
         end
 
-        local connect_timeout = service.connect_timeout or
+        local connect_timeout = service ~= null and service.connect_timeout or
                                 api.upstream_connect_timeout
         if connect_timeout then
           balancer_data.connect_timeout = connect_timeout
@@ -549,7 +550,7 @@ return {
           balancer_data.connect_timeout = 60000
         end
 
-        local send_timeout = service.write_timeout or
+        local send_timeout = service ~= null and service.write_timeout or
                              api.upstream_send_timeout
         if send_timeout then
           balancer_data.send_timeout = send_timeout
@@ -558,7 +559,7 @@ return {
           balancer_data.send_timeout = 60000
         end
 
-        local read_timeout = service.read_timeout or
+        local read_timeout = service ~= null and service.read_timeout or
                              api.upstream_read_timeout
         if read_timeout then
           balancer_data.read_timeout = read_timeout
